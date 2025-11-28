@@ -1,0 +1,2 @@
+set(__QT_DEPLOY_TARGET_GestionProjectCppApp_FILE /home/yes-sir404/GestionCoursApp/build/Desktop_Qt_6_10_1-Debug/GestionProjectCppApp)
+set(__QT_DEPLOY_TARGET_GestionProjectCppApp_TYPE EXECUTABLE)
