@@ -20,9 +20,9 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql)
 # ----------------------------------------------------------------------
 set(PROJECT_SOURCES
     main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
+
+
+
 
     # Vos nouveaux fichiers
     dbmanager.cpp
@@ -43,6 +43,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(GestionProjectCppApp
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        ENV
+        TEST.md
+        ENV
+        yessir
+        Mainwindow.h Mainwindow.cpp
     )
     # Define target properties for Android with Qt 6 as:
     #    set_property(TARGET GestionProjectCppApp APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

@@ -1,9 +1,0 @@
-/home/yes-sir404/GestionCoursApp/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/GestionProjectCppApp.dir
-/home/yes-sir404/GestionCoursApp/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/edit_cache.dir
-/home/yes-sir404/GestionCoursApp/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/rebuild_cache.dir
-/home/yes-sir404/GestionCoursApp/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/list_install_components.dir
-/home/yes-sir404/GestionCoursApp/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/install.dir
-/home/yes-sir404/GestionCoursApp/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/install/local.dir
-/home/yes-sir404/GestionCoursApp/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/install/strip.dir
-/home/yes-sir404/GestionCoursApp/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/GestionProjectCppApp_autogen_timestamp_deps.dir
-/home/yes-sir404/GestionCoursApp/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/GestionProjectCppApp_autogen.dir

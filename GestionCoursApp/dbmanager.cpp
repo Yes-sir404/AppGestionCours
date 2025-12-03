@@ -16,9 +16,9 @@ DbManager::DbManager()
 {
     m_db = QSqlDatabase::addDatabase("QPSQL");
     m_db.setHostName("localhost");
-    m_db.setDatabaseName("gestion_cours_db"); // Le nom exact de votre base
+    m_db.setDatabaseName("gestioncours"); // Le nom exact de votre base
     m_db.setUserName("postgres");              // Votre login Postgres (souvent 'postgres')
-    m_db.setPassword("votre_mot_de_passe");    // <--- REMPLACEZ CECI PAR VOTRE VRAI MDP
+    m_db.setPassword("root");    // <--- REMPLACEZ CECI PAR VOTRE VRAI MDP
 }
 
 // Destructeur : On ferme proprement
