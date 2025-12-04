@@ -26,6 +26,9 @@ private:
     DbManager();
     ~DbManager();
 
+    // Initialisation des tables si elles n'existent pas
+    bool createTables();
+
     QSqlDatabase m_db;
 };
 

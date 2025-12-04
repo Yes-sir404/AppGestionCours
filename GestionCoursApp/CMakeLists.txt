@@ -36,17 +36,16 @@ set(PROJECT_SOURCES
     signupdialog.ui  # Correction de la typo (Dialo -> dialog)
 
     publication.h
+    publication.cpp
     classmodule.h
+    classmodule.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(GestionProjectCppApp
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        ENV
-        TEST.md
-        ENV
-        yessir
+
         Mainwindow.h Mainwindow.cpp
     )
     # Define target properties for Android with Qt 6 as:

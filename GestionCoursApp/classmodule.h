@@ -44,6 +44,9 @@ public:
     // Méthode statique pour charger tous les modules d'un étudiant
     static QList<ClassModule> getModulesByStudent(int studentId);
 
+    // 4. Inscription d'un étudiant via le code
+    static bool joinModule(int studentId, const QString &code);
+
 private:
     int m_id;
     QString m_nom;

@@ -14,11 +14,30 @@ DbManager& DbManager::instance()
 // Constructeur : C'est ici qu'on configure les paramètres
 DbManager::DbManager()
 {
-    m_db = QSqlDatabase::addDatabase("QPSQL");
-    m_db.setHostName("localhost");
-    m_db.setDatabaseName("gestioncours"); // Le nom exact de votre base
-    m_db.setUserName("postgres");              // Votre login Postgres (souvent 'postgres')
-    m_db.setPassword("root");    // <--- REMPLACEZ CECI PAR VOTRE VRAI MDP
+    qDebug() << "--- INITIALISATION DBMANAGER (SQLite) ---";
+
+    // 0. Vérification des pilotes disponibles
+    if (!QSqlDatabase::drivers().contains("QSQLITE")) {
+        qDebug() << "❌ ERREUR FATALE : Le pilote QSQLITE est introuvable !";
+        qDebug() << "Pilotes disponibles :" << QSqlDatabase::drivers();
+        // On ne retourne pas ici car c'est un constructeur, mais l'erreur sera visible.
+    }
+
+    // 1. Configuration pour SQLite
+    m_db = QSqlDatabase::addDatabase("QSQLITE");
+    m_db.setDatabaseName("gestioncours.db"); // Fichier local
+
+    // 2. Connexion
+    if (!m_db.open()) {
+        qDebug() << "❌ ECHEC CONNEXION :" << m_db.lastError().text();
+    } else {
+        qDebug() << "✅ Connexion SQLite réussie !";
+        
+        // 3. Création des tables si nécessaire
+        if (!createTables()) {
+             qDebug() << "❌ Erreur lors de la création des tables.";
+        }
+    }
 }
 
 // Destructeur : On ferme proprement
@@ -52,4 +71,75 @@ bool DbManager::isOpen() const
 void DbManager::closeDb()
 {
     m_db.close();
+}
+
+bool DbManager::createTables()
+{
+    QSqlQuery query;
+    
+    // 1. Table Utilisateurs
+    // On stocke le rôle en TEXT ('PROF' ou 'ETUDIANT')
+    QString createUsers = "CREATE TABLE IF NOT EXISTS utilisateurs ("
+                          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                          "nom TEXT NOT NULL, "
+                          "prenom TEXT NOT NULL, "
+                          "email TEXT NOT NULL UNIQUE, "
+                          "password TEXT NOT NULL, "
+                          "role TEXT NOT NULL"
+                          ");";
+                          
+    if (!query.exec(createUsers)) {
+        qDebug() << "Erreur création table utilisateurs:" << query.lastError().text();
+        return false;
+    }
+
+    // 2. Table Modules
+    QString createModules = "CREATE TABLE IF NOT EXISTS modules ("
+                            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                            "nom TEXT NOT NULL, "
+                            "description TEXT, "
+                            "code_acces TEXT NOT NULL UNIQUE, "
+                            "id_prof INTEGER NOT NULL, "
+                            "FOREIGN KEY(id_prof) REFERENCES utilisateurs(id)"
+                            ");";
+
+    if (!query.exec(createModules)) {
+        qDebug() << "Erreur création table modules:" << query.lastError().text();
+        return false;
+    }
+
+    // 3. Table Inscriptions (Liaison Etudiant <-> Module)
+    QString createInscriptions = "CREATE TABLE IF NOT EXISTS inscriptions ("
+                                 "id_etudiant INTEGER NOT NULL, "
+                                 "id_module INTEGER NOT NULL, "
+                                 "date_inscription TEXT, "
+                                 "PRIMARY KEY (id_etudiant, id_module), "
+                                 "FOREIGN KEY(id_etudiant) REFERENCES utilisateurs(id), "
+                                 "FOREIGN KEY(id_module) REFERENCES modules(id)"
+                                 ");";
+
+    if (!query.exec(createInscriptions)) {
+        qDebug() << "Erreur création table inscriptions:" << query.lastError().text();
+        return false;
+    }
+
+    // 4. Table Publications
+    QString createPublications = "CREATE TABLE IF NOT EXISTS publications ("
+                                 "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                 "titre TEXT NOT NULL, "
+                                 "contenu TEXT, "
+                                 "date_creation TEXT, "
+                                 "id_module INTEGER NOT NULL, "
+                                 "type TEXT NOT NULL, "
+                                 "file_path TEXT, "
+                                 "FOREIGN KEY(id_module) REFERENCES modules(id)"
+                                 ");";
+
+    if (!query.exec(createPublications)) {
+        qDebug() << "Erreur création table publications:" << query.lastError().text();
+        return false;
+    }
+
+    qDebug() << "✅ Tables vérifiées/créées avec succès.";
+    return true;
 }
