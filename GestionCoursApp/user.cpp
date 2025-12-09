@@ -99,6 +99,47 @@ bool User::emailExiste(const QString &email) {
     return false;
 }
 
+// --- [VALIDATION] : Format email ---
+bool User::isValidEmailStructure(const QString &email) {
+    if (email.isEmpty()) return false;
+    if (!email.contains('@')) return false;
+    
+    // Nouveaux domaines stricts
+    bool isProf = email.endsWith("@edulink.prof.ma", Qt::CaseInsensitive);
+    bool isEtud = email.endsWith("@edulink.etud.ma", Qt::CaseInsensitive);
+    
+    if (!isProf && !isEtud) {
+        return false;
+    }
+    
+    // Vérif basique avant le @
+    int atIndex = email.indexOf('@');
+    if (atIndex < 1) return false;
+    
+    return true;
+}
+
+// --- [HELPER] : Get Role from Email ---
+UserRole User::getRoleFromEmail(const QString &email) {
+    if (email.endsWith("@edulink.prof.ma", Qt::CaseInsensitive)) {
+        return PROFESSEUR;
+    }
+    // Par défaut ou si c'est @edulink.etud.ma
+    return ETUDIANT;
+}
+
+
+// --- [VALIDATION] : Format mot de passe ---
+bool User::isValidPasswordStructure(const QString &password) {
+    // Règles :
+    // - Au moins 6 caractères
+    // - Pas vide (déjà couvert par length >= 6)
+    
+    if (password.length() < 6) return false;
+    
+    return true;
+}
+
 // ==========================================
 // 2. CLASSE PROF
 // ==========================================

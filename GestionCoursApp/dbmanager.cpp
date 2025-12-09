@@ -1,7 +1,10 @@
 #include "dbmanager.h"
 #include <QSqlDatabase>
 #include <QSqlError>
+#include <QSqlRecord> // Needed for migration check
 #include <QDebug>
+#include <QCoreApplication>
+#include <QDir>
 
 // Initialisation du Singleton (L'instance unique)
 // Cela permet d'accéder à la BDD de partout sans la passer en paramètre
@@ -25,7 +28,7 @@ DbManager::DbManager()
 
     // 1. Configuration pour SQLite
     m_db = QSqlDatabase::addDatabase("QSQLITE");
-    m_db.setDatabaseName("gestioncours.db"); // Fichier local
+    m_db.setDatabaseName("../gestioncours.db"); // Fichier local
 
     // 2. Connexion
     if (!m_db.open()) {
@@ -37,6 +40,9 @@ DbManager::DbManager()
         if (!createTables()) {
              qDebug() << "❌ Erreur lors de la création des tables.";
         }
+
+        // 4. Initialisation du dossier de stockage
+        initStorageDirectory();
     }
 }
 
@@ -140,6 +146,43 @@ bool DbManager::createTables()
         return false;
     }
 
+    // MIGRATION : Vérifier si la colonne file_path existe (pour les anciennes BDD)
+    QSqlRecord record = m_db.record("publications");
+    if (!record.contains("file_path")) {
+        qDebug() << "⚠️ Colonne file_path manquante -> Ajout en cours...";
+        if (query.exec("ALTER TABLE publications ADD COLUMN file_path TEXT")) {
+            qDebug() << "✅ Colonne file_path ajoutée avec succès.";
+        } else {
+            qDebug() << "❌ Erreur ajout colonne file_path:" << query.lastError().text();
+        }
+    }
+    
+    // MIGRATION : Vérifier la colonne 'date_creation'
+    if (!record.contains("date_creation")) {
+        qDebug() << "⚠️ Colonne date_creation manquante -> Ajout en cours...";
+        if (query.exec("ALTER TABLE publications ADD COLUMN date_creation TEXT")) {
+             qDebug() << "✅ Colonne date_creation ajoutée avec succès.";
+        } else {
+             qDebug() << "❌ Erreur ajout colonne date_creation:" << query.lastError().text();
+        }
+    }
+
     qDebug() << "✅ Tables vérifiées/créées avec succès.";
     return true;
+}
+
+void DbManager::initStorageDirectory()
+{
+    QString path = QCoreApplication::applicationDirPath() + "/uploads";
+    QDir dir(path);
+
+    if (!dir.exists()) {
+        if (dir.mkpath(".")) {
+            qDebug() << "✅ Dossier uploads créé avec succès :" << path;
+        } else {
+            qDebug() << "❌ Erreur : Impossible de créer le dossier uploads !";
+        }
+    } else {
+        qDebug() << "ℹ️ Dossier uploads existant :" << path;
+    }
 }

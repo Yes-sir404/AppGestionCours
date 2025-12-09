@@ -233,3 +233,32 @@ bool ClassModule::joinModule(int studentId, const QString &code) {
         return false;
     }
 }
+
+// 5. Supprimer un module par ID
+bool ClassModule::deleteModule(int id) {
+    QSqlQuery query;
+    // Note: Si la base de données a des contraintes ON DELETE CASCADE bloquées, 
+    // il faudrait d'abord supprimer les publications/inscriptions.
+    // On suppose ici que la FK est configurée en CASCADE ou qu'on supprime bêtement.
+    
+    // On nettoie d'abord les dépendances manuelles si besoin (exemple simple)
+    QSqlQuery qDep;
+    qDep.prepare("DELETE FROM publications WHERE id_module = :id");
+    qDep.bindValue(":id", id);
+    qDep.exec(); // On tente le nettoyage
+    
+    qDep.prepare("DELETE FROM inscriptions WHERE id_module = :id");
+    qDep.bindValue(":id", id);
+    qDep.exec();
+
+    // Suppression du module
+    query.prepare("DELETE FROM modules WHERE id = :id");
+    query.bindValue(":id", id);
+    
+    if (query.exec()) {
+        return true;
+    } else {
+        qDebug() << "Erreur suppression module:" << query.lastError().text();
+        return false;
+    }
+}

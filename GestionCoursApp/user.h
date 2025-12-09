@@ -48,6 +48,15 @@ public:
     // [Vérification] : Vérifie si l'email existe déjà (pour éviter les doublons à l'inscription)
     static bool emailExiste(const QString &email);
 
+    // [Validation] : Vérifie le format de l'email (doit finir par @edulink.prof.ma ou @edulink.etud.ma)
+    static bool isValidEmailStructure(const QString &email);
+
+    // [Helper] : Déduit le rôle depuis l'email
+    static UserRole getRoleFromEmail(const QString &email);
+
+    // [Validation] : Vérifie la complexité du mot de passe
+    static bool isValidPasswordStructure(const QString &password);
+
 protected:
     int m_id;
     QString m_nom;

@@ -1,5 +1,6 @@
 #include "signupdialog.h"
 #include "ui_signupdialog.h"
+#include "styles.h"
 #include "user.h"       // On inclut notre classe User
 #include <QMessageBox>  // Pour les messages d'erreur/succès
 #include <QLineEdit>
@@ -9,12 +10,10 @@ SignupDialog::SignupDialog(QWidget *parent) :
     ui(new Ui::SignupDialog)
 {
     ui->setupUi(this);
+    this->setStyleSheet(Styles::getGlobalStyleSheet());
 
     // Astuce : Masquer les caractères du mot de passe
     ui->lineEditPass->setEchoMode(QLineEdit::Password);
-
-    // Cocher Étudiant par défaut
-    ui->radioEtudiant->setChecked(true);
 }
 
 SignupDialog::~SignupDialog()
@@ -45,14 +44,21 @@ void SignupDialog::on_btnInscrire_clicked()
         return;
     }
 
-    // 4. Détermination du Rôle (LA PARTIE IMPORTANTE)
-    UserRole roleSelectionne;
-
-    if (ui->radioProf->isChecked()) {
-        roleSelectionne = UserRole::PROFESSEUR;
-    } else {
-        roleSelectionne = UserRole::ETUDIANT; // Par défaut
+    // --- VALIDATION AJOUTÉE ---
+    if (!User::isValidEmailStructure(email)) {
+        QMessageBox::warning(this, "Erreur", "L'email doit finir par @edulink.prof.ma ou @edulink.etud.ma");
+        return;
     }
+
+    if (!User::isValidPasswordStructure(password)) {
+        QMessageBox::warning(this, "Erreur", "Le mot de passe doit faire au moins 6 caractères.");
+        return;
+    }
+    // -------------------------
+
+    // 4. Détermination du Rôle (AUTOMATIQUE)
+    // On utilise notre helper qui se base sur le domaine @edulink.prof.ma ou @edulink.etud.ma
+    UserRole roleSelectionne = User::getRoleFromEmail(email);
 
     // 5. Création de l'objet User temporaire pour l'inscription
     // (On met 0 pour l'ID car la base de données le générera)

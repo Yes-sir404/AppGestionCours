@@ -8,7 +8,16 @@
 #include <QComboBox>
 #include <QListWidget>
 #include <QTextEdit>
+
 #include <QLabel>
+#include <QUuid>
+#include <QFileInfo>
+#include <QFile>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QDesktopServices>
+#include <QUrl>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -36,16 +45,20 @@ private slots:
 
     // Slots pour l'interface Professeur
     void on_btnCreateClass_clicked();
-    void on_profCourseSelected(int index);
-    void on_btnPublish_clicked();
+
     void on_btnSelectFile_clicked();
+    void on_publicationItemClicked(QListWidgetItem *item);
+
 
 
 private:
     Ui::MainWindow *ui;
     User* m_currentUser;
 
+    QString saveFileLocally(QString cheminSource); // Helper pour sauvegarder le fichier
+    void downloadPublication(int pubId); // Helper pour télécharger
     void resetLoginForm();
+
     
     // Méthode pour construire l'interface étudiant dynamiquement
     void setupStudentUI();
@@ -67,13 +80,14 @@ private:
     // Widgets Professeur
     QLineEdit* m_leCourseName;
     QLineEdit* m_leCourseDesc;
-    QComboBox* m_comboProfCourses;
+    QListWidget* m_listProfCourses;
     
     QLineEdit* m_lePubTitle;
     QTextEdit* m_tePubContent;
     QComboBox* m_comboPubType;
     QLabel* m_lblSelectedFile;
     QString m_selectedFilePath;
+    void loadStyleSheet();
 };
 
 #endif // MAINWINDOW_H

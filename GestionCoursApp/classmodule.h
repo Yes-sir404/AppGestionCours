@@ -47,6 +47,9 @@ public:
     // 4. Inscription d'un étudiant via le code
     static bool joinModule(int studentId, const QString &code);
 
+    // 5. Supprimer un module par ID
+    static bool deleteModule(int id);
+
 private:
     int m_id;
     QString m_nom;

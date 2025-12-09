@@ -20,20 +20,22 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql)
 # ----------------------------------------------------------------------
 set(PROJECT_SOURCES
     main.cpp
-
-
-
-
-    # Vos nouveaux fichiers
-    dbmanager.cpp
+    mainwindow.ui
+    mainwindow.cpp
+    mainwindow.h
     dbmanager.h
-
-    user.cpp
+    dbmanager.cpp
+    classmodule.h
+    classmodule.cpp
     user.h
-
-    signupdialog.cpp
+    user.cpp
+    publication.h
     signupdialog.h
+    signupdialog.cpp
     signupdialog.ui  # Correction de la typo (Dialo -> dialog)
+    styles.h
+    coursedashboard.h
+    coursedashboard.cpp
 
     publication.h
     publication.cpp

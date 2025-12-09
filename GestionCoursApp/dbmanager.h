@@ -28,6 +28,8 @@ private:
 
     // Initialisation des tables si elles n'existent pas
     bool createTables();
+    void initStorageDirectory(); // Création du dossier uploads
+
 
     QSqlDatabase m_db;
 };

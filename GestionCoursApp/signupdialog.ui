@@ -58,23 +58,7 @@
      </item>
     </layout>
    </item>
-   <item>
-    <widget class="QRadioButton" name="radioEtudiant">
-     <property name="text">
-      <string>Etudiant</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QRadioButton" name="radioProf">
-     <property name="text">
-      <string>Professeur</string>
-     </property>
-    </widget>
-   </item>
+   <!-- Radio buttons removed for auto-detection -->
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>

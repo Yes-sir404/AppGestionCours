@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h" // Généré depuis le XML ci-dessus
 #include "signupdialog.h"  // Pour ouvrir l'inscription
+#include "styles.h"
+#include "coursedashboard.h" // NOUVEAU
 #include <QPushButton>
 #include <QLineEdit>
 #include <QLabel>
@@ -14,6 +16,10 @@
 #include <QFileDialog>
 #include <QTextEdit>
 #include <QFileInfo>
+#include <QFile>
+#include <QClipboard> // Ajout pour le presse-papier
+#include <QApplication>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -22,6 +28,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // AJOUTEZ CETTE LIGNE ↓
+    loadStyleSheet();
+    
+    // Configuration de la fenêtre
+    setMinimumSize(900, 650);  // ← AJOUTEZ AUSSI CETTE LIGNE
+    
     // Au démarrage, on affiche la page 0 (Login)
     ui->stackedWidget->setCurrentIndex(0);
 
@@ -37,7 +49,11 @@ MainWindow::MainWindow(QWidget *parent)
     m_currentFilterType = PubType::ANNONCE; // Valeur par défaut
     m_filterActive = false;
     
-    m_comboProfCourses = nullptr; // Important pour le check d'init
+    m_listProfCourses = nullptr; // Important pour le check d'init
+    m_comboCourses = nullptr;
+    m_leCodeClass = nullptr;
+    m_leCourseName = nullptr;
+    m_leCourseDesc = nullptr;
 }
 
 MainWindow::~MainWindow()
@@ -46,6 +62,11 @@ MainWindow::~MainWindow()
         delete m_currentUser;
     }
     delete ui;
+}
+//Design
+void MainWindow::loadStyleSheet()
+{
+    this->setStyleSheet(Styles::getGlobalStyleSheet());
 }
 
 // --- LOGIQUE DE CONNEXION ---
@@ -59,31 +80,49 @@ void MainWindow::on_btnLogin_clicked()
         return;
     }
 
+    // --- VALIDATION AJOUTÉE ---
+    if (!User::isValidEmailStructure(email)) {
+        QMessageBox::warning(this, "Erreur", "L'email doit finir par @edulink.prof.ma ou @edulink.etud.ma");
+        return;
+    }
+
+    // Optionnel : on peut aussi pré-valider le mot de passe pour éviter des requêtes inutiles
+    if (!User::isValidPasswordStructure(pass)) {
+        QMessageBox::warning(this, "Erreur", "Le format du mot de passe est invalide (min 6 caractères).");
+        return;
+    }
+    // -------------------------
+
     // Appel à la fonction statique qu'on a codée dans User.cpp
+    qDebug() << "Tentative de connexion pour :" << email;
     User* loggedInUser = User::login(email, pass);
 
     if (loggedInUser) {
+        qDebug() << "Connexion réussie. Rôle :" << loggedInUser->getRole();
         // Connexion Réussie !
         m_currentUser = loggedInUser;
 
         // Vérification du Rôle pour l'aiguillage
         if (m_currentUser->getRole() == UserRole::PROFESSEUR) {
             // Page 1 : Prof
+            qDebug() << "Setup Prof UI...";
             ui->stackedWidget->setCurrentIndex(1);
             setupProfUI();
-            // ui->lblWelcomeProf->setText("Bienvenue Professeur " + m_currentUser->getNom());
+            qDebug() << "Setup Prof UI OK";
         }
         else {
             // Page 2 : Étudiant
+            qDebug() << "Setup Student UI...";
             ui->stackedWidget->setCurrentIndex(2);
             setupStudentUI(); // Construction dynamique de l'interface
-            // ui->lblWelcomeStudent->setText("Bienvenue Étudiant " + m_currentUser->getNom()); // Déplacé dans setupStudentUI
+            qDebug() << "Setup Student UI OK";
         }
 
         // On vide les champs de mot de passe par sécurité
         ui->lineEditPassword->clear();
 
     } else {
+        qDebug() << "Échec connexion";
         QMessageBox::critical(this, "Erreur", "Email ou mot de passe incorrect.");
     }
 }
@@ -160,6 +199,8 @@ void MainWindow::setupStudentUI()
     
     // On réintègre les widgets du .ui
     ui->lblWelcomeStudent->setParent(ui->pageStudent); 
+    // Mise à jour du texte de bienvenue
+    ui->lblWelcomeStudent->setText(QString("Bienvenue, %1 %2").arg(m_currentUser->getPrenom(), m_currentUser->getNom()));
     headerLayout->addWidget(ui->lblWelcomeStudent);
     
     // Le bouton déconnexion du .ui
@@ -182,36 +223,19 @@ void MainWindow::setupStudentUI()
     
     mainLayout->addWidget(groupJoin);
 
-    // 3. Mes Cours (Liste déroulante)
-    mainLayout->addWidget(new QLabel("Mes Cours :"));
-    m_comboCourses = new QComboBox();
-    connect(m_comboCourses, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::on_courseSelected);
-    mainLayout->addWidget(m_comboCourses);
+    // 3. ACCUEIL / FIL D'ACTUALITÉ
+    QPushButton* btnDashboard = new QPushButton("Voir le Fil d'Actualité ➜");
+    btnDashboard->setStyleSheet("background-color: #1a73e8; font-size: 16px; padding: 15px; margin-top: 20px; color: white;");
+    connect(btnDashboard, &QPushButton::clicked, [this](){
+        CourseDashboard* dash = new CourseDashboard(m_currentUser, this);
+        dash->exec();
+        delete dash;
+    });
+    mainLayout->addWidget(btnDashboard);
 
-    // 4. Filtres
-    QHBoxLayout* filterLayout = new QHBoxLayout();
-    QPushButton* btnAll = new QPushButton("Tout");
-    QPushButton* btnCours = new QPushButton("Cours");
-    QPushButton* btnTD = new QPushButton("TD/TP");
-    QPushButton* btnAnnonce = new QPushButton("Annonces");
-    
-    // On utilise des propriétés dynamiques ou des lambdas pour identifier le filtre
-    connect(btnAll, &QPushButton::clicked, [this](){ m_filterActive = false; on_courseSelected(m_comboCourses->currentIndex()); });
-    connect(btnCours, &QPushButton::clicked, [this](){ m_currentFilterType = PubType::COURS; m_filterActive = true; on_courseSelected(m_comboCourses->currentIndex()); });
-    connect(btnTD, &QPushButton::clicked, [this](){ m_currentFilterType = PubType::TD_TP; m_filterActive = true; on_courseSelected(m_comboCourses->currentIndex()); });
-    connect(btnAnnonce, &QPushButton::clicked, [this](){ m_currentFilterType = PubType::ANNONCE; m_filterActive = true; on_courseSelected(m_comboCourses->currentIndex()); });
-
-    filterLayout->addWidget(btnAll);
-    filterLayout->addWidget(btnCours);
-    filterLayout->addWidget(btnTD);
-    filterLayout->addWidget(btnAnnonce);
-    
-    mainLayout->addLayout(filterLayout);
-
-    // 5. Liste des Publications
-    m_listPublications = new QListWidget();
-    mainLayout->addWidget(m_listPublications);
-    
+    // On retire l'ancienne liste ici pour ne pas faire doublon
+    // m_listPublications = new QListWidget(); ... (supprimé)
+        
     // Chargement initial
     loadStudentCourses();
 }
@@ -232,6 +256,7 @@ void MainWindow::handleJoinClass()
 
 void MainWindow::loadStudentCourses()
 {
+    if (!m_comboCourses) return;
     m_comboCourses->clear();
     QList<ClassModule> modules = ClassModule::getModulesByStudent(m_currentUser->getId());
     
@@ -259,12 +284,55 @@ void MainWindow::on_courseSelected(int index)
     
     for (Publication* pub : std::as_const(pubs)) {
         QString icon = "";
-        if (pub->getType() == PubType::COURS) icon = "📘 [COURS] ";
-        else if (pub->getType() == PubType::TD_TP) icon = "📝 [TD/TP] ";
-        else icon = "📢 [ANNONCE] ";
+        bool canDownload = false;
         
-        QListWidgetItem* item = new QListWidgetItem(icon + pub->getTitre() + "\n" + pub->getContenu());
-        m_listPublications->addItem(item);
+        if (pub->getType() == PubType::COURS) {
+            icon = "📘 [COURS] ";
+            // On vérifie s'il y a un fichier associé (simple check sur le champ filePath)
+            // Note: Idéalement on devrait vérifier ce champ dans la classe Publication
+            CoursePub* cp = dynamic_cast<CoursePub*>(pub);
+            if (cp) {
+                 qDebug() << "Publication ID:" << pub->getId() << " Path:" << cp->getFilePath();
+                 if (!cp->getFilePath().isEmpty()) {
+                    canDownload = true;
+                 }
+            }
+        }
+        else if (pub->getType() == PubType::TD_TP) {
+            icon = "📝 [TD/TP] ";
+            // On pourrait activer le téléchargement pour TD/TP si on ajoute le champ
+        }
+        else {
+            icon = "📢 [ANNONCE] ";
+        }
+        
+        // Création de l'item (widget container)
+        QListWidgetItem* item = new QListWidgetItem(m_listPublications);
+        QWidget* widget = new QWidget();
+        QHBoxLayout* layout = new QHBoxLayout(widget);
+        layout->setContentsMargins(5, 5, 5, 5);
+        
+        QLabel* lblText = new QLabel(icon + pub->getTitre() + "\n" + pub->getContenu());
+        lblText->setWordWrap(true);
+        layout->addWidget(lblText, 1); // Stretch factor 1 pour prendre la place
+        
+        if (canDownload) {
+            QPushButton* btnDl = new QPushButton("Télécharger");
+            // On connecte le bouton directement à la méthode de téléchargement
+            // On utilise une lambda qui capture l'ID
+            int id = pub->getId();
+            connect(btnDl, &QPushButton::clicked, [this, id]() {
+                qDebug() << "Bouton télécharger cliqué pour l'ID:" << id;
+                this->downloadPublication(id);
+            });
+            layout->addWidget(btnDl, 0); // Pas de stretch
+        }
+        
+        widget->setLayout(layout);
+        item->setSizeHint(widget->sizeHint()); // Important pour la taille
+        
+        m_listPublications->setItemWidget(item, widget);
+        item->setData(Qt::UserRole, pub->getId()); // On garde l'ID au cas où
         
         // Nettoyage mémoire (car getPublications renvoie des new)
         delete pub; 
@@ -278,7 +346,7 @@ void MainWindow::on_courseSelected(int index)
 void MainWindow::setupProfUI()
 {
     // Si déjà initialisé (check simple sur un pointeur)
-    if (m_comboProfCourses != nullptr) {
+    if (m_listProfCourses != nullptr) {
         loadProfCourses();
         return;
     }
@@ -301,6 +369,8 @@ void MainWindow::setupProfUI()
     // 1. Header
     QHBoxLayout* headerLayout = new QHBoxLayout();
     ui->lblWelcomeProf->setParent(ui->pageProf);
+    // Mise à jour du texte de bienvenue
+    ui->lblWelcomeProf->setText(QString("Bienvenue, Pr. %1 %2").arg(m_currentUser->getPrenom(), m_currentUser->getNom()));
     headerLayout->addWidget(ui->lblWelcomeProf);
     ui->btnLogoutProf->setParent(ui->pageProf);
     headerLayout->addWidget(ui->btnLogoutProf);
@@ -321,60 +391,123 @@ void MainWindow::setupProfUI()
     
     mainLayout->addWidget(groupCreate);
 
-    // 3. Sélection du Cours
-    mainLayout->addWidget(new QLabel("Gérer le cours :"));
-    m_comboProfCourses = new QComboBox();
-    connect(m_comboProfCourses, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::on_profCourseSelected);
-    mainLayout->addWidget(m_comboProfCourses);
+    // 3. Liste des cours créés (NOUVEAU)
+    QGroupBox* groupList = new QGroupBox("Mes Cours Actifs");
+    QVBoxLayout* layoutList = new QVBoxLayout(groupList);
+    
+    m_listProfCourses = new QListWidget();
+    // SCROLL FIX: On laisse le widget s'étendre, mais on le bride en hauteur pour forcer le scroll
+    m_listProfCourses->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_listProfCourses->setMinimumHeight(200); 
+    m_listProfCourses->setMaximumHeight(450); // Empêche de pousser les boutons hors écran
+    layoutList->addWidget(m_listProfCourses);
+    
+    mainLayout->addWidget(groupList);
 
-    // 4. Publier
-    QGroupBox* groupPub = new QGroupBox("Nouvelle Publication");
-    QVBoxLayout* pubLayout = new QVBoxLayout(groupPub);
-    
-    m_lePubTitle = new QLineEdit();
-    m_lePubTitle->setPlaceholderText("Titre de la publication");
-    
-    m_tePubContent = new QTextEdit();
-    m_tePubContent->setPlaceholderText("Contenu / Message...");
-    m_tePubContent->setMaximumHeight(100);
-    
-    QHBoxLayout* typeLayout = new QHBoxLayout();
-    m_comboPubType = new QComboBox();
-    m_comboPubType->addItem("Annonce", QVariant::fromValue(PubType::ANNONCE));
-    m_comboPubType->addItem("Cours", QVariant::fromValue(PubType::COURS));
-    m_comboPubType->addItem("TD/TP", QVariant::fromValue(PubType::TD_TP));
-    
-    QPushButton* btnFile = new QPushButton("Joindre un fichier");
-    connect(btnFile, &QPushButton::clicked, this, &MainWindow::on_btnSelectFile_clicked);
-    m_lblSelectedFile = new QLabel("Aucun fichier sélectionné");
-    
-    typeLayout->addWidget(new QLabel("Type:"));
-    typeLayout->addWidget(m_comboPubType);
-    typeLayout->addWidget(btnFile);
-    typeLayout->addWidget(m_lblSelectedFile);
-    
-    QPushButton* btnPublish = new QPushButton("Publier");
-    connect(btnPublish, &QPushButton::clicked, this, &MainWindow::on_btnPublish_clicked);
-    
-    pubLayout->addWidget(m_lePubTitle);
-    pubLayout->addWidget(m_tePubContent);
-    pubLayout->addLayout(typeLayout);
-    pubLayout->addWidget(btnPublish);
-    
-    mainLayout->addWidget(groupPub);
-    
+    // 4. GROS BOUTON "GÉRER MES COURS / FIL D'ACTUALITÉ"
+    QPushButton* btnDashboard = new QPushButton("Gérer mes Cours & Publications ➜");
+    btnDashboard->setStyleSheet("background-color: #28a745; font-size: 16px; padding: 15px; margin-top: 20px;");
+    connect(btnDashboard, &QPushButton::clicked, [this](){
+        CourseDashboard* dash = new CourseDashboard(m_currentUser, this);
+        dash->exec(); // Ouverture modale
+        delete dash;
+    });
+    mainLayout->addWidget(btnDashboard);
+
     // Initialisation
     loadProfCourses();
 }
+// Note: J'ai retiré l'ancienne UI de publication ici pour clarifier, car tout est dans le dashboard maintenant.
 
 void MainWindow::loadProfCourses()
 {
-    m_comboProfCourses->clear();
+    if (!m_listProfCourses) return;
+    m_listProfCourses->clear();
+    
+    // Debug: Check user ID
+    if (!m_currentUser) return;
+    qDebug() << "Loading courses for prof ID:" << m_currentUser->getId();
+
     QList<ClassModule> modules = ClassModule::getModulesByProf(m_currentUser->getId());
+    qDebug() << "Found" << modules.size() << "modules.";
     
     for (const ClassModule& module : modules) {
-        // On affiche Nom + Code pour que le prof puisse le donner
-        m_comboProfCourses->addItem(module.getNom() + " (Code: " + module.getCodeAcces() + ")", module.getId());
+        qDebug() << "Adding module:" << module.getNom() << module.getCodeAcces();
+        
+        // Widget item personnalisé
+        QListWidgetItem* item = new QListWidgetItem(m_listProfCourses);
+        
+        QWidget* widget = new QWidget();
+        // Important pour éviter les soucis de style hérité
+        widget->setObjectName("courseItemWidget");
+        widget->setStyleSheet("#courseItemWidget { background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; }");
+
+        QHBoxLayout* layout = new QHBoxLayout(widget);
+        layout->setContentsMargins(15, 10, 15, 10); // Marges latérales un peu plus grandes
+        
+        QLabel* lblName = new QLabel("<b>" + module.getNom() + "</b>");
+        lblName->setStyleSheet("font-size: 16px; color: #333;"); // Police un peu plus grande
+        lblName->setAlignment(Qt::AlignVCenter | Qt::AlignLeft); // Alignement explicite
+        
+        QLabel* lblCode = new QLabel("Code: <span style='color:blue; font-weight:bold;'>" + module.getCodeAcces() + "</span>");
+        lblCode->setStyleSheet("font-size: 14px;");
+
+        QPushButton* btnCopy = new QPushButton("Copier");
+        btnCopy->setCursor(Qt::PointingHandCursor);
+        btnCopy->setMinimumWidth(80);
+        btnCopy->setMinimumHeight(30); // Un peu plus compact
+        btnCopy->setStyleSheet("QPushButton { background-color: #007bff; color: white; border-radius: 4px; padding: 5px; font-weight: bold; } QPushButton:hover { background-color: #0056b3; }");
+        
+        QString code = module.getCodeAcces();
+        connect(btnCopy, &QPushButton::clicked, [this, code]() {
+            QApplication::clipboard()->setText(code);
+            QMessageBox::information(this, "Copié", "Code copié : " + code);
+        });
+
+        // --- BOUTON SUPPRIMER (NOUVEAU) ---
+        QPushButton* btnDelete = new QPushButton("Supprimer");
+        btnDelete->setCursor(Qt::PointingHandCursor);
+        btnDelete->setMinimumWidth(80);
+        btnDelete->setMinimumHeight(30);
+        btnDelete->setStyleSheet("QPushButton { background-color: #dc3545; color: white; border-radius: 4px; padding: 5px; font-weight: bold; } QPushButton:hover { background-color: #c82333; }");
+        
+        int modId = module.getId();
+        connect(btnDelete, &QPushButton::clicked, [this, modId]() {
+            QMessageBox msgBox(this);
+            msgBox.setWindowTitle("Supprimer le cours");
+            msgBox.setText("Voulez-vous vraiment supprimer ce cours et tout son contenu ?");
+            msgBox.setIcon(QMessageBox::Warning);
+            QPushButton* yes = msgBox.addButton("Oui, supprimer", QMessageBox::YesRole);
+            QPushButton* no = msgBox.addButton("Annuler", QMessageBox::NoRole);
+            // CORRECTION: On donne une taille min et du padding pour ne pas couper le texte
+            yes->setStyleSheet("background-color: #dc3545; color: white; min-width: 120px; padding: 8px; border-radius: 4px;");
+            no->setStyleSheet("background-color: #6c757d; color: white; min-width: 100px; padding: 8px; border-radius: 4px;");
+            
+            msgBox.exec();
+            
+            if (msgBox.clickedButton() == yes) {
+                if (ClassModule::deleteModule(modId)) {
+                    loadProfCourses(); // Rafraîchir la liste
+                } else {
+                    QMessageBox::critical(this, "Erreur", "Impossible de supprimer le cours.");
+                }
+            }
+        });
+        
+        layout->addWidget(lblName, 1);
+        layout->addWidget(lblCode, 0);
+        layout->addWidget(btnCopy, 0);
+        layout->addWidget(btnDelete, 0); // Ajout au layout
+        
+        // Centrage vertical des éléments dans le layout
+        layout->setAlignment(Qt::AlignVCenter);
+
+        widget->setLayout(layout);
+        
+        // CORRECTION: On augmente la hauteur pour être sûr que "g" "j" etc ne soient pas coupés
+        item->setSizeHint(QSize(0, 100)); 
+        
+        m_listProfCourses->setItemWidget(item, widget);
     }
 }
 
@@ -404,12 +537,14 @@ void MainWindow::on_btnCreateClass_clicked()
     }
 }
 
+/*
 void MainWindow::on_profCourseSelected(int index)
 {
     // Pour l'instant on ne fait rien de spécial quand on change de cours,
     // mais on pourrait charger l'historique des publications de ce cours.
     Q_UNUSED(index);
 }
+*/
 
 void MainWindow::on_btnSelectFile_clicked()
 {
@@ -421,48 +556,85 @@ void MainWindow::on_btnSelectFile_clicked()
     }
 }
 
+/*
 void MainWindow::on_btnPublish_clicked()
 {
-    if (m_comboProfCourses->currentIndex() < 0) {
-        QMessageBox::warning(this, "Erreur", "Veuillez sélectionner un cours.");
-        return;
-    }
+    // DEPRECATED : Logic moved to CourseDashboard
+}
+*/
+
+
+
+QString MainWindow::saveFileLocally(QString cheminSource) {
+    if (cheminSource.isEmpty()) return "";
+
+    // 1. Définir le dossier de destination
+    QString dossierDestination = QCoreApplication::applicationDirPath() + "/uploads";
     
-    QString title = m_lePubTitle->text().trimmed();
-    if (title.isEmpty()) {
-        QMessageBox::warning(this, "Erreur", "Le titre est obligatoire.");
-        return;
-    }
+    // 2. Générer un nom unique pour éviter les conflits
+    QFileInfo fileInfo(cheminSource);
+    QString extension = fileInfo.suffix();
+    QString nouveauNom = QUuid::createUuid().toString(QUuid::WithoutBraces) + "." + extension;
     
-    int moduleId = m_comboProfCourses->currentData().toInt();
-    PubType type = m_comboPubType->currentData().value<PubType>();
-    
-    Publication* pub = nullptr;
-    
-    if (type == PubType::COURS) {
-        CoursePub* cp = new CoursePub();
-        cp->setFilePath(m_selectedFilePath);
-        pub = cp;
-    } else if (type == PubType::TD_TP) {
-        pub = new TdTpPub();
+    QString cheminFinal = dossierDestination + "/" + nouveauNom;
+
+    // 3. Copier le fichier
+    if (QFile::copy(cheminSource, cheminFinal)) {
+        // On retourne le chemin RELATIF pour la base de données
+        return "uploads/" + nouveauNom; 
     } else {
-        pub = new AnnouncementPub();
+        qDebug() << "Erreur copie fichier:" << cheminSource << "vers" << cheminFinal;
+        return ""; 
     }
+}
+
+void MainWindow::on_publicationItemClicked(QListWidgetItem *item)
+{
+    int pubId = item->data(Qt::UserRole).toInt();
+    downloadPublication(pubId);
+}
+
+
+void MainWindow::downloadPublication(int pubId)
+{
+    qDebug() << "Début downloadPublication pour ID:" << pubId;
+    // Récupérer le chemin depuis la BDD
+    QSqlQuery query;
+    query.prepare("SELECT titre, type, chemin_fichier FROM publications WHERE id = :id");
+    query.bindValue(":id", pubId);
     
-    pub->setTitre(title);
-    pub->setContenu(m_tePubContent->toPlainText());
-    pub->setModuleId(moduleId);
-    
-    if (pub->publier()) {
-        QMessageBox::information(this, "Succès", "Publication ajoutée !");
-        m_lePubTitle->clear();
-        m_tePubContent->clear();
-        m_lblSelectedFile->setText("Aucun fichier sélectionné");
-        m_selectedFilePath.clear();
-    } else {
-        QMessageBox::critical(this, "Erreur", "Échec de la publication.");
+    if (query.exec() && query.next()) {
+        QString type = query.value("type").toString();
+        QString relativePath = query.value("chemin_fichier").toString();
+        QString titre = query.value("titre").toString();
+        
+        if (type == "COURS" && !relativePath.isEmpty()) {
+            // Reconstruire le chemin absolu
+            QString fullPath = QCoreApplication::applicationDirPath() + "/" + relativePath;
+             QFileInfo checkFile(fullPath);
+             
+             if (checkFile.exists() && checkFile.isFile()) {
+                 int rep = QMessageBox::question(this, "Téléchargement", 
+                                       "Voulez-vous télécharger le fichier joint à ce cours ?",
+                                       QMessageBox::Yes | QMessageBox::No);
+                 
+                 if (rep == QMessageBox::Yes) {
+                     QString savePath = QFileDialog::getSaveFileName(this, "Enregistrer sous", titre + "." + checkFile.suffix());
+                     if (!savePath.isEmpty()) {
+                         if (QFile::copy(fullPath, savePath)) {
+                             QMessageBox::information(this, "Succès", "Fichier téléchargé : " + savePath);
+                         } else {
+                             QMessageBox::critical(this, "Erreur", "Impossible de sauvegarder le fichier.");
+                         }
+                     }
+                 }
+             } else {
+                 // Fichier introuvable
+                 QMessageBox::warning(this, "Info", "Aucun fichier associé ou fichier introuvable sur le serveur.");
+             }
+        } else {
+             QMessageBox::information(this, "Info", "Cette publication ne contient pas de fichier téléchargeable.");
+        }
     }
-    
-    delete pub;
 }
 

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Gestion de Cours - 1337</string>
+   <string>EduLink - Link the students and professors</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -44,7 +44,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Bienvenue sur la Plateforme</string>
+           <string>Bienvenue sur la Plateforme EduLink</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -66,7 +66,7 @@
           <item row="0" column="1">
            <widget class="QLineEdit" name="lineEditEmail">
             <property name="placeholderText">
-             <string>user@school.com</string>
+             <string>user@eduLink.(prof|etud).ma</string>
             </property>
            </widget>
           </item>
@@ -103,6 +103,9 @@
           </property>
           <property name="flat">
            <bool>true</bool>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: black;</string>
           </property>
          </widget>
         </item>

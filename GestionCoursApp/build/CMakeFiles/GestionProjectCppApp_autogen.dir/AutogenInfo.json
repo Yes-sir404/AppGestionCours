@@ -424,21 +424,27 @@
 	"HEADERS" : 
 	[
 		[
-			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/Mainwindow.h",
-			"MU",
-			"EWIEGA46WW/moc_Mainwindow.cpp",
-			null
-		],
-		[
 			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/classmodule.h",
 			"MU",
 			"EWIEGA46WW/moc_classmodule.cpp",
 			null
 		],
 		[
+			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/coursedashboard.h",
+			"MU",
+			"EWIEGA46WW/moc_coursedashboard.cpp",
+			null
+		],
+		[
 			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/dbmanager.h",
 			"MU",
 			"EWIEGA46WW/moc_dbmanager.cpp",
+			null
+		],
+		[
+			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/mainwindow.h",
+			"MU",
+			"EWIEGA46WW/moc_mainwindow.cpp",
 			null
 		],
 		[
@@ -451,6 +457,12 @@
 			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/signupdialog.h",
 			"MU",
 			"EWIEGA46WW/moc_signupdialog.cpp",
+			null
+		],
+		[
+			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/styles.h",
+			"MU",
+			"EWIEGA46WW/moc_styles.cpp",
 			null
 		],
 		[
@@ -534,12 +546,12 @@
 	"SOURCES" : 
 	[
 		[
-			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/Mainwindow.cpp",
+			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/classmodule.cpp",
 			"MU",
 			null
 		],
 		[
-			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/classmodule.cpp",
+			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/coursedashboard.cpp",
 			"MU",
 			null
 		],
@@ -550,6 +562,11 @@
 		],
 		[
 			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/main.cpp",
+			"MU",
+			null
+		],
+		[
+			"C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/mainwindow.cpp",
 			"MU",
 			null
 		],
