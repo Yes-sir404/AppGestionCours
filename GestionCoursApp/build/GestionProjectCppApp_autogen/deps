@@ -495,6 +495,14 @@ GestionProjectCppApp_autogen/timestamp: \
 	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Sql/Qt6SqlTargets-relwithdebinfo.cmake \
 	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Sql/Qt6SqlTargets.cmake \
 	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Sql/Qt6SqlVersionlessAliasTargets.cmake \
+	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Svg/Qt6SvgAdditionalTargetInfo.cmake \
+	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Svg/Qt6SvgConfig.cmake \
+	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Svg/Qt6SvgConfigVersion.cmake \
+	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Svg/Qt6SvgConfigVersionImpl.cmake \
+	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Svg/Qt6SvgDependencies.cmake \
+	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Svg/Qt6SvgTargets-relwithdebinfo.cmake \
+	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Svg/Qt6SvgTargets.cmake \
+	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Svg/Qt6SvgVersionlessAliasTargets.cmake \
 	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Widgets/Qt6QModernWindowsStylePluginAdditionalTargetInfo.cmake \
 	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Widgets/Qt6QModernWindowsStylePluginConfig.cmake \
 	C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Widgets/Qt6QModernWindowsStylePluginTargets-relwithdebinfo.cmake \
@@ -786,6 +794,7 @@ GestionProjectCppApp_autogen/timestamp: \
 	C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/mainwindow.h \
 	C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/publication.cpp \
 	C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/publication.h \
+	C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/resources.qrc \
 	C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/signupdialog.cpp \
 	C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/signupdialog.h \
 	C:/Users/YES-SIR/Desktop/cppProject/AppGestionCours/GestionCoursApp/styles.h \

@@ -19,6 +19,8 @@
 #include <QFile>
 #include <QClipboard> // Ajout pour le presse-papier
 #include <QApplication>
+#include <QPixmap>
+#include <QDebug>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -27,6 +29,23 @@ MainWindow::MainWindow(QWidget *parent)
     , m_currentUser(nullptr)
 {
     ui->setupUi(this);
+
+    // --- AJOUT DU LOGO ---
+    QLabel* logoLabel = new QLabel(this);
+    // On charge depuis les ressources
+    QPixmap logoPixmap(":/logo/EduLink_Logo.svg"); 
+    if (!logoPixmap.isNull()) {
+        // Redimensionnement propre
+        logoLabel->setPixmap(logoPixmap.scaled(250, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        logoLabel->setAlignment(Qt::AlignCenter);
+        
+        // On l'ajoute au layout de la page de login (pageLogin -> verticalLayout_2)
+        // On l'insère à l'index 1 (après le spacer du haut) pour qu'il soit au dessus du titre
+        ui->verticalLayout_2->insertWidget(1, logoLabel);
+    } else {
+        qDebug() << "Erreur: Impossible de charger le logo :/logo/EduLink_Logo.svg";
+    }
+    // ---------------------
 
     // AJOUTEZ CETTE LIGNE ↓
     loadStyleSheet();

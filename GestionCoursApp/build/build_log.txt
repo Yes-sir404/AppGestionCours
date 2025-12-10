@@ -1,7 +1,0 @@
-[1/1] Linking CXX executable GestionProjectCppApp.exe
-FAILED: GestionProjectCppApp.exe 
-C:\WINDOWS\system32\cmd.exe /C "cd . && c:\Qt\Tools\mingw1310_64\bin\g++.exe -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -mwindows CMakeFiles/GestionProjectCppApp.dir/GestionProjectCppApp_autogen/mocs_compilation.cpp.obj CMakeFiles/GestionProjectCppApp.dir/main.cpp.obj CMakeFiles/GestionProjectCppApp.dir/mainwindow.cpp.obj CMakeFiles/GestionProjectCppApp.dir/dbmanager.cpp.obj CMakeFiles/GestionProjectCppApp.dir/classmodule.cpp.obj CMakeFiles/GestionProjectCppApp.dir/user.cpp.obj CMakeFiles/GestionProjectCppApp.dir/signupdialog.cpp.obj CMakeFiles/GestionProjectCppApp.dir/coursedashboard.cpp.obj CMakeFiles/GestionProjectCppApp.dir/publication.cpp.obj -o GestionProjectCppApp.exe -Wl,--out-implib,libGestionProjectCppApp.dll.a -Wl,--major-image-version,0,--minor-image-version,0  C:/Qt/6.10.1/mingw_64/lib/libQt6Widgets.a  C:/Qt/6.10.1/mingw_64/lib/libQt6Sql.a  C:/Qt/6.10.1/mingw_64/lib/libQt6Gui.a  -ld3d11  -ldxgi  -ldxguid  -ld3d12  C:/Qt/6.10.1/mingw_64/lib/libQt6Core.a  -lmpr  -luserenv  -lmingw32  C:/Qt/6.10.1/mingw_64/lib/libQt6EntryPoint.a  -lshell32  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 && cd ."
-C:/Qt/Tools/mingw1310_64/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/../../../../x86_64-w64-mingw32/bin/ld.exe: cannot open output file GestionProjectCppApp.exe: Permission denied
-
-collect2.exe: error: ld returned 1 exit status
-ninja: build stopped: subcommand failed.

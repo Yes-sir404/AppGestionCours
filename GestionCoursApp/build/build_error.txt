@@ -1,4 +1,0 @@
-[1/5] Automatic MOC and UIC for target GestionProjectCppApp
-[2/4] Building CXX object CMakeFiles/GestionProjectCppApp.dir/signupdialog.cpp.obj
-[3/4] Building CXX object CMakeFiles/GestionProjectCppApp.dir/mainwindow.cpp.obj
-[4/4] Linking CXX executable GestionProjectCppApp.exe

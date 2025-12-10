@@ -335,6 +335,9 @@ Qt6Gui_DIR:PATH=C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Gui
 //The directory containing a CMake configuration file for Qt6Sql.
 Qt6Sql_DIR:PATH=C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Sql
 
+//The directory containing a CMake configuration file for Qt6Svg.
+Qt6Svg_DIR:PATH=C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6Svg
+
 //The directory containing a CMake configuration file for Qt6WidgetsTools.
 Qt6WidgetsTools_DIR:PATH=C:/Qt/6.10.1/mingw_64/lib/cmake/Qt6WidgetsTools
 

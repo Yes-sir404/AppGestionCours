@@ -11,7 +11,7 @@
 #include <QPushButton>
 #include "user.h"
 #include "classmodule.h"
-q
+
 // Un widget personnalisé pour afficher une publication style "Post Facebook"
 class PublicationWidget : public QWidget {
     Q_OBJECT

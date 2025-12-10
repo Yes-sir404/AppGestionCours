@@ -12,8 +12,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ----------------------------------------------------------------------
 # 1. AJOUT DU MODULE SQL ICI (COMPONENTS Widgets Sql)
 # ----------------------------------------------------------------------
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Sql)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Sql Svg)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql Svg)
 
 # ----------------------------------------------------------------------
 # 2. LISTE DE TOUS VOS FICHIERS ICI
@@ -41,6 +41,7 @@ set(PROJECT_SOURCES
     publication.cpp
     classmodule.h
     classmodule.cpp
+    resources.qrc
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -74,6 +75,7 @@ endif()
 target_link_libraries(GestionProjectCppApp PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Sql
+    Qt${QT_VERSION_MAJOR}::Svg
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
